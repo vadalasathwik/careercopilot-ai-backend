@@ -6,6 +6,7 @@ from alembic import context
 from dotenv import load_dotenv
 
 from app.db.base import Base
+import app.models
 
 load_dotenv()
 
@@ -21,6 +22,7 @@ config.set_main_option(
 # Logging
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
+
 
 # SQLAlchemy metadata
 target_metadata = Base.metadata
