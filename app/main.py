@@ -22,7 +22,7 @@ def health():
         "status": "healthy"
     }
 
-@app.get("/db-health")
+@app.get("/health/db")
 def db_health():
     try:
         with engine.connect() as connection:
