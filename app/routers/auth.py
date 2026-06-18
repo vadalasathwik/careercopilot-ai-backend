@@ -25,12 +25,26 @@ def google_login(
     )
 
     if existing_user:
+        # Sync name or image_url if they changed
+        updated = False
+        if existing_user.name != payload.name:
+            existing_user.name = payload.name
+            updated = True
+        if payload.image_url and existing_user.image_url != payload.image_url:
+            existing_user.image_url = payload.image_url
+            updated = True
+
+        if updated:
+            db.commit()
+            db.refresh(existing_user)
+
         return {
             "message": "User already exists",
             "user": {
                 "id": existing_user.id,
                 "name": existing_user.name,
                 "email": existing_user.email,
+                "image_url": existing_user.image_url,
             }
         }
 
@@ -47,5 +61,6 @@ def google_login(
             "id": user.id,
             "name": user.name,
             "email": user.email,
+            "image_url": user.image_url,
         }
     }

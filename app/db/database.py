@@ -14,11 +14,15 @@ if not DATABASE_URL:
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
+connect_args = {}
+if DATABASE_URL.startswith("postgresql://"):
+    connect_args["sslmode"] = "require"
+
 engine = create_engine(
     DATABASE_URL,
     pool_pre_ping=True,
     pool_recycle=300,
-    connect_args={"sslmode": "require"}
+    connect_args=connect_args
 )
 
 SessionLocal = sessionmaker(
