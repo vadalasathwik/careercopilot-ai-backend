@@ -7,7 +7,8 @@ def create_resume(db: Session, resume: ResumeCreate) -> Resume:
     db_resume = Resume(
         user_id=resume.user_id,
         file_name=resume.file_name,
-        file_url=resume.file_url
+        file_url=resume.file_url,
+        resume_text=resume.resume_text
     )
     db.add(db_resume)
     db.commit()

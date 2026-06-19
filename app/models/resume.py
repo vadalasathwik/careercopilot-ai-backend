@@ -1,6 +1,5 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text
 from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
 
 from app.db.base import Base
 
@@ -16,11 +15,12 @@ class Resume(Base):
         nullable=False,
         index=True
     )
-    user = relationship("User")
 
     file_name = Column(String, nullable=False)
 
     file_url = Column(String, nullable=False)
+
+    resume_text = Column(Text, nullable=True)
 
     created_at = Column(
         DateTime(timezone=True),

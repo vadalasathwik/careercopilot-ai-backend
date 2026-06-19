@@ -7,6 +7,7 @@ from app.models.user import User
 from app.crud.resume import create_resume, get_user_resumes
 from app.schemas.resume import ResumeCreate, ResumeResponse
 from app.services.storage_service import upload_file_to_storage
+from app.services.resume_parser import extract_resume_text
 
 router = APIRouter(
     prefix="/resume",
@@ -69,11 +70,21 @@ async def upload_resume(
             detail=f"Failed to upload file to storage: {str(e)}"
         )
 
-    # 6. Save metadata to DB
+    # 6. Extract resume text
+    try:
+        resume_text = extract_resume_text(file_bytes, filename)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to extract text from resume: {str(e)}"
+        )
+
+    # 7. Save metadata and text to DB
     resume_in = ResumeCreate(
         user_id=user_id,
         file_name=filename,
-        file_url=file_url
+        file_url=file_url,
+        resume_text=resume_text
     )
     db_resume = create_resume(db, resume_in)
 
