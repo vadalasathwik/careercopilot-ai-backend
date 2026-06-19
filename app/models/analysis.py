@@ -1,11 +1,4 @@
-from sqlalchemy import (
-    Column,
-    Integer,
-    ForeignKey,
-    String,
-    DateTime,
-    JSON
-)
+from sqlalchemy import Column, Integer, ForeignKey, DateTime, Text
 from sqlalchemy.sql import func
 
 from app.db.base import Base
@@ -18,20 +11,29 @@ class Analysis(Base):
 
     user_id = Column(
         Integer,
-        ForeignKey("users.id")
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True
     )
 
-    resume_url = Column(String)
+    resume_id = Column(
+        Integer,
+        ForeignKey("resumes.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
 
-    jd_text = Column(String)
+    job_description = Column(Text, nullable=False)
 
-    match_score = Column(Integer)
+    ats_score = Column(Integer, nullable=True)
+    match_score = Column(Integer, nullable=True)
 
-    ats_score = Column(Integer)
+    missing_skills = Column(Text, nullable=True)
 
-    analysis_json = Column(JSON)
+    recommendations = Column(Text, nullable=True)
 
     created_at = Column(
         DateTime(timezone=True),
-        server_default=func.now()
+        server_default=func.now(),
+        nullable=False
     )
