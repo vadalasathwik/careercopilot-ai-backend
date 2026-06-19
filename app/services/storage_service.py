@@ -72,6 +72,10 @@ def upload_file_to_storage(
     )
 
     # Generate signed URL (7 days)
+    # NOTE: The storage bucket is private for security.
+    # Signed URLs generated here will expire after 7 days (604800 seconds).
+    # Future improvement: Store the raw storage path in the database instead of the signed URL,
+    # and generate fresh signed URLs on-demand when requested by the user.
     signed_url_response = (
         supabase_client
         .storage
