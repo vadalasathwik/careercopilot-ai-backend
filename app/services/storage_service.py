@@ -61,29 +61,54 @@ def upload_file_to_storage(
             mime_type = "application/octet-stream"
 
     # Upload file
-    supabase_client.storage.from_(
-        bucket_name
-    ).upload(
-        path=unique_name,
-        file=file_bytes,
-        file_options={
-            "content-type": mime_type
-        }
-    )
+    try:
+        supabase_client.storage.from_(
+            bucket_name
+        ).upload(
+            path=unique_name,
+            file=file_bytes,
+            file_options={
+                "content-type": mime_type
+            }
+        )
+    except AttributeError as e:
+        # Bypass the storage3 SDK bug where it accesses '.text' on a parsed JSON dict
+        cause = e.__context__  # KeyError
+        if cause and hasattr(cause, '__context__'):
+            http_err = cause.__context__  # HTTPStatusError
+            if http_err and hasattr(http_err, 'response'):
+                status_code = http_err.response.status_code
+                response_text = http_err.response.text
+                raise Exception(f"Supabase Storage error (HTTP {status_code}): {response_text}") from e
+        raise Exception(f"Supabase Storage upload failed due to SDK parsing error: {str(e)}") from e
+    except Exception as e:
+        raise Exception(f"Supabase Storage upload failed: {str(e)}") from e
 
     # Generate signed URL (7 days)
     # NOTE: The storage bucket is private for security.
     # Signed URLs generated here will expire after 7 days (604800 seconds).
     # Future improvement: Store the raw storage path in the database instead of the signed URL,
     # and generate fresh signed URLs on-demand when requested by the user.
-    signed_url_response = (
-        supabase_client
-        .storage
-        .from_(bucket_name)
-        .create_signed_url(
-            unique_name,
-            60 * 60 * 24 * 7
+    try:
+        signed_url_response = (
+            supabase_client
+            .storage
+            .from_(bucket_name)
+            .create_signed_url(
+                unique_name,
+                60 * 60 * 24 * 7
+            )
         )
-    )
+    except AttributeError as e:
+        cause = e.__context__  # KeyError
+        if cause and hasattr(cause, '__context__'):
+            http_err = cause.__context__  # HTTPStatusError
+            if http_err and hasattr(http_err, 'response'):
+                status_code = http_err.response.status_code
+                response_text = http_err.response.text
+                raise Exception(f"Supabase Storage signed URL generation failed (HTTP {status_code}): {response_text}") from e
+        raise Exception(f"Supabase Storage signed URL generation failed due to SDK parsing error: {str(e)}") from e
+    except Exception as e:
+        raise Exception(f"Supabase Storage signed URL generation failed: {str(e)}") from e
 
     return signed_url_response["signedURL"]
