@@ -18,11 +18,12 @@ if not SUPABASE_URL:
     )
 
 # Remove /rest/v1 if someone pasted the API URL
-if SUPABASE_URL.endswith("/rest/v1"):
-    SUPABASE_URL = SUPABASE_URL.replace("/rest/v1", "")
+SUPABASE_URL = SUPABASE_URL.strip().strip("'\"")
 
 if SUPABASE_URL.endswith("/rest/v1/"):
-    SUPABASE_URL = SUPABASE_URL.replace("/rest/v1/", "")
+    SUPABASE_URL = SUPABASE_URL[:-9]
+elif SUPABASE_URL.endswith("/rest/v1"):
+    SUPABASE_URL = SUPABASE_URL[:-8]
 
 supabase_client: Client = create_client(
     SUPABASE_URL,
